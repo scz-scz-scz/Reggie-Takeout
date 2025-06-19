@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="scz.reggiecode1.mapper.AddressBookMapper">
+    <select id="getMaxId" resultType="java.lang.Long">
+        select max(id) from address_book;
+    </select>
+
+    <insert id="save">
+        insert into address_book (id, user_id, consignee, sex, phone, detail, label, create_time, update_time, create_user, update_user) VALUES (#{id},#{userId},#{consignee},#{sex},#{phone},#{detail},#{label},#{createTime},#{updateTime},#{createUser},#{updateUser});
+    </insert>
+
+    <update id="updateDefault2false">
+        update address_book set is_default=0 where user_id=#{userId};
+    </update>
+
+    <update id="updateDefault">
+        update address_book set is_default=#{isDefault},update_time=#{updateTime},update_user=#{updateUser} where id=#{id};
+    </update>
+
+    <select id="list" resultType="scz.reggiecode1.entity.AddressBook">
+        select * from address_book where user_id=#{userId} order by is_default desc,update_time desc;
+    </select>
+
+    <select id="listById" resultType="scz.reggiecode1.entity.AddressBook">
+        select * from address_book where id=#{id};
+    </select>
+
+    <update id="update">
+        update address_book
+        <set>
+            <if test="consignee!=null">
+                consignee=#{consignee},
+            </if>
+            <if test="sex!=null">
+                sex=#{sex},
+            </if>
+            <if test="phone!=null">
+                phone=#{phone},
+            </if>
+            <if test="detail!=null">
+                detail=#{detail},
+            </if>
+            <if test="label!=null">
+                label=#{label},
+            </if>
+            update_time=#{updateTime},update_user=#{updateUser}
+        </set>
+        where id=#{id};
+    </update>
+
+    <select id="getDefault" resultType="scz.reggiecode1.entity.AddressBook">
+        select * from address_book where user_id=#{userId} and is_default=1;
+    </select>
+
+    <delete id="delete">
+        delete from address_book where id in
+        <foreach collection="ids" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+        ;
+    </delete>
+</mapper>

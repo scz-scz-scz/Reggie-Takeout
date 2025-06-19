@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="scz.reggiecode1.mapper.UserMapper">
+    <select id="selectByPhone" resultType="scz.reggiecode1.entity.User">
+        select * from user where phone=#{phone};
+    </select>
+
+    <select id="getMaxId" resultType="java.lang.Long">
+        select max(id) from user;
+    </select>
+
+    <insert id="save">
+        insert into user (id,phone,status) values (#{id},#{phone},#{status});
+    </insert>
+
+    <select id="list" resultType="scz.reggiecode1.entity.User">
+        select * from user where id=#{id};
+    </select>
+</mapper>

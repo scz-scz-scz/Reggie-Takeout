@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="scz.reggiecode1.mapper.OrderMapper">
+    <select id="getMaxId" resultType="java.lang.Long">
+        select max(id) from orders;
+    </select>
+
+    <insert id="save">
+        insert into orders (id, number, status, user_id, address_book_id, order_time, checkout_time, pay_method, amount, remark, phone, address, user_name, consignee) VALUES (#{id},#{number},#{status},#{userId},#{addressBookId},#{orderTime},#{checkoutTime},#{payMethod},#{amount},#{remark},#{phone},#{address},#{userName},#{consignee});
+    </insert>
+
+    <select id="selectAllByUserId" resultType="java.lang.Integer">
+        select count(*) from orders where user_id=#{userId};
+    </select>
+
+    <select id="list4User" resultType="scz.reggiecode1.dto.OrderDto">
+        select * from orders where user_id=#{userId} order by checkout_time desc limit #{index},#{pageSize};
+    </select>
+
+    <select id="listById" resultType="scz.reggiecode1.entity.Orders">
+        select * from orders where id=#{id};
+    </select>
+
+    <select id="selectAll" resultType="java.lang.Integer">
+        select count(*) from orders
+        <where>
+            <if test="number!=null">
+                number like concat('%',#{number},'%')
+            </if>
+            <if test="beginTime!=null">
+                and order_time>#{beginTime}
+            </if>
+            <if test="endTime!=null">
+                and #{endTime}>checkout_time
+            </if>
+        </where>
+        ;
+    </select>
+    <select id="list" resultType="scz.reggiecode1.entity.Orders">
+        select * from orders
+        <where>
+            <if test="number!=null">
+                and number like concat('%',#{number},'%')
+            </if>
+            <if test="beginTime!=null">
+                and order_time>#{beginTime}
+            </if>
+            <if test="endTime!=null">
+                and #{endTime}>checkout_time
+            </if>
+        </where>
+        order by checkout_time desc limit #{index},#{pageSize};
+    </select>
+
+    <update id="updateStatus">
+        update orders set status=#{status} where id=#{id};
+    </update>
+</mapper>

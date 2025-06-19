@@ -1,0 +1,41 @@
+server:
+  port: 8080
+  address: 0.0.0.0  #接收外部访问请求
+
+spring:
+  application:
+    name: reggie-code1
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/reggie?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: 1234
+    type: com.alibaba.druid.pool.DruidDataSource
+
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+
+reggie:
+  file:
+    path: F:\IDEA\project\reggie-code\reggie-code1\src\main\resources\image
+
+#logging:
+#  level:
+#    org:
+#      springframework:
+#        jdbc:
+#          support:
+#            JdbcTransactionManager: debug
+
+#阿里云短信服务用户登录名称 reggie@1187247748784429.onaliyun.com
+#AccessKey ID LTAI5t8b9dNnm1HkoKytTU4W
+#AccessKey Secret UZyoyY2mKC4Mdc09CDjAWRwxZIFJMY
+aliyun:
+  sms:
+    regionId: cn-qingdao
+    accessKeyId: LTAI5t8b9dNnm1HkoKytTU4W
+    accessKeySecret: UZyoyY2mKC4Mdc09CDjAWRwxZIFJMY
+    signName: 阿里云短信测试
+    templateCode: SMS_154950909

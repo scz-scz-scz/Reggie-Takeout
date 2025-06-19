@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="scz.reggiecode1.mapper.SetmealDishMapper">
+    <update id="update">
+        update setmeal_dish set name=#{name},price=#{price},sort=#{sort},update_time=#{updateTime},update_user=#{updateUser},is_deleted=#{isDeleted} where dish_id=#{id};
+    </update>
+
+    <select id="getMaxId" resultType="java.lang.Long">
+        select max(id) from setmeal_dish;
+    </select>
+
+    <insert id="save">
+        insert into setmeal_dish (id, setmeal_id, dish_id, name, price, copies, sort, create_time, update_time, create_user, update_user) VALUES (#{id},#{setmealId},#{dishId},#{name},#{price},#{copies},#{sort},#{createTime},#{updateTime},#{createUser},#{updateUser});
+    </insert>
+
+    <delete id="delete">
+        delete from setmeal_dish where setmeal_id in
+        <foreach collection="ids" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+        ;
+    </delete>
+
+    <select id="list" resultType="scz.reggiecode1.entity.SetmealDish">
+        select * from setmeal_dish where setmeal_id=#{setmealId} order by sort,update_time desc;
+    </select>
+
+    <update id="preDelete">
+        update setmeal_dish set is_deleted=1 where setmeal_id=#{setmealId}
+    </update>
+
+    <select id="getMaxSortBySetmealId" resultType="java.lang.Integer">
+        select max(sort) from setmeal_dish where setmeal_id=#{setmealId};
+    </select>
+
+    <select id="getSortBySetmealIdAndDishId" resultType="java.lang.Integer">
+        select sort from setmeal_dish where setmeal_id=#{setmealId} and dish_id=#{dishId};
+    </select>
+
+    <update id="updateBySetmealIdAndDishId">
+        update setmeal_dish
+        <set>
+            <if test="copies!=null">
+                copies=#{copies},
+            </if>
+            update_time=#{updateTime},update_user=#{updateUser},is_deleted=#{isDeleted}
+        </set>
+        where setmeal_id=#{setmealId} and dish_id=#{dishId};
+    </update>
+
+    <delete id="deleteByIsDeleted">
+        delete from setmeal_dish where setmeal_id=#{setmealId} and is_deleted=1;
+    </delete>
+
+    <delete id="deleteByDishId">
+        delete from setmeal_dish where dish_id in
+        <foreach collection="dishIds" item="dishId" separator="," open="(" close=")">
+            #{dishId}
+        </foreach>
+        ;
+    </delete>
+</mapper>
