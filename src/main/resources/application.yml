@@ -19,9 +19,9 @@ mybatis:
 
 reggie:
   file:
-    #windows中路径
+    #windows中图片的路径
     path: F:\IDEA\project\reggie-code\reggie-code1\src\main\resources\image
-    #linux中路径
+    #linux中图片的路径
 #    path: /usr/local/reggie/image
 
 #logging:
