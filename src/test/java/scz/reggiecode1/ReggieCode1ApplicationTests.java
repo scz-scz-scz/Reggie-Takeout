@@ -42,8 +42,12 @@ class ReggieCode1ApplicationTests {
 
     //spring-data-redis测试
     /*@Autowired
-    private RedisTemplate redisTemplate;
+    private RedisTemplate<String,Object> redisTemplate;
     @Test
+    public void delete(){
+        redisTemplate.keys("*").stream().forEach(key->redisTemplate.delete(key));
+    }*/
+    /*@Test
     public void testspringdataredis() throws InterruptedException {
         redisTemplate.opsForValue().set("1","sb",3L, TimeUnit.SECONDS);
 

@@ -15,9 +15,9 @@ public interface DishService {
 
     void update(DishDto dishDto);
 
-    void updateStatus(Integer status, Long[] ids);
+    List<DishDto> updateStatus(Integer status, Long[] ids);
 
-    String[] delete(Long[] ids);
+    List<DishDto> delete(Long[] ids);
 
     List<DishDto> list(Dish dish);
 }

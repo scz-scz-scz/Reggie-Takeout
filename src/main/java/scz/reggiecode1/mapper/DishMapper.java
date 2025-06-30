@@ -27,8 +27,6 @@ public interface DishMapper {
 
     void updateStatus(Dish dish);
 
-    String[] selectImage(Long[] ids);
-
     Integer delete(Long[] ids);
 
     List<DishDto> listByCategoryId(Long categoryId);

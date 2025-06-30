@@ -13,6 +13,7 @@ import scz.reggiecode1.mapper.CategoryMapper;
 import scz.reggiecode1.mapper.DishMapper;
 import scz.reggiecode1.service.DishService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -69,30 +70,36 @@ public class DishServiceImpl implements DishService {
 
     //启停售菜品
     @Override
-    public void updateStatus(Integer status, Long[] ids) {
+    public List<DishDto> updateStatus(Integer status, Long[] ids) {
+        List<DishDto> dishDtoList=new ArrayList<>();
         for (Long id : ids) {
             Dish dish=new Dish();
             dish.setId(id);
             dish.setStatus(status);
             MyMetaObjectHandler.update(dish);
             dishMapper.updateStatus(dish);
+            dishDtoList.add(dishMapper.listById(id));
         }
+        return dishDtoList;
     }
 
     //删除菜品并获取图片名
     @Override
-    public String[] delete(Long[] ids) {
-        String[] images=dishMapper.selectImage(ids);
+    public List<DishDto> delete(Long[] ids) {
+        List<DishDto> dishDtoList=new ArrayList<>();
+        for (Long id : ids) {
+            dishDtoList.add(dishMapper.listById(id));
+        }
         Integer count=dishMapper.delete(ids);
         if (count!=ids.length){
             if (ids.length==1)
                 throw new CustomException("删除失败：当前菜品状态为启售");
             throw new CustomException("删除失败：当前批量选中的菜品中有菜品状态为启售");
         }
-        return images;
+        return dishDtoList;
     }
 
-    //查询菜品（新建和修改套餐时展示）
+    //查询菜品（新建和修改套餐时展示，以及用户展示）
     @Override
     public List<DishDto> list(Dish dish) {
         List<DishDto> dishDtoList=dishMapper.listByCategoryId(dish.getCategoryId());
