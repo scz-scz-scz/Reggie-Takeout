@@ -16,12 +16,6 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         log.info("拦截到请求:{}",request.getRequestURL());   //log中可以用{}代表占位符，类似于printf
 
-        //后面请删除这段代码
-        /*if (request.getRequestURL().toString().contains("/shoppingCart/list")){
-            response.getWriter().write("{\"code\":1,\"msg\":null,\"data\":[],\"map\":{}}");
-            return false;
-        }*/
-
         HttpSession session = request.getSession();
         Long id;
         String url=request.getRequestURL().toString();
