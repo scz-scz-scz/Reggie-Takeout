@@ -8,10 +8,10 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
-public class RedisConfig extends CachingConfigurerSupport {
+public class RedisConfig{
     @Bean
-    public RedisTemplate<Object,Object> redisTemplate(RedisConnectionFactory redisConnectionFactory){
-        RedisTemplate<Object,Object> redisTemplate=new RedisTemplate<>();
+    public RedisTemplate<String,Object> redisTemplate(RedisConnectionFactory redisConnectionFactory){
+        RedisTemplate<String,Object> redisTemplate=new RedisTemplate<>();
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setValueSerializer(new StringRedisSerializer());
         redisTemplate.setHashKeySerializer(new StringRedisSerializer());
