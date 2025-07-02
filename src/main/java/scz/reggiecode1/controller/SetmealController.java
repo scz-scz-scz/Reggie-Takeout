@@ -1,6 +1,9 @@
 package scz.reggiecode1.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -26,10 +29,13 @@ public class SetmealController {
     private DishService dishService;
     @Autowired
     private CommonController commonController;
+    @Autowired
+    private CacheManager cacheManager;
 
     //新增套餐
     @PostMapping
     @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRES_NEW)
+    @CacheEvict(value = "setmealCache",allEntries = true)   //allEntries指删除当前setmealCache下的所有缓存数据
     public Result<String> save(@RequestBody SetmealDto setmealDto){
         setmealService.save(setmealDto);
         setmealDishService.save(setmealDto);
@@ -46,6 +52,7 @@ public class SetmealController {
     //删除套餐
     @DeleteMapping
     @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRES_NEW)
+    @CacheEvict(value = "setmealCache",allEntries = true)   //allEntries指删除当前setmealCache下的所有缓存数据
     public Result<String> delete(@RequestParam Long[] ids){
         //删除菜品
         setmealDishService.delete(ids);
@@ -58,6 +65,7 @@ public class SetmealController {
 
     //启停售套餐
     @PostMapping("/status/{status}")
+    @CacheEvict(value = "setmealCache",allEntries = true)   //allEntries指删除当前setmealCache下的所有缓存数据
     public Result<String> updateStatus(@PathVariable Integer status,@RequestParam Long[] ids){
         setmealService.updateStatus(status,ids);
         if (status==0)
@@ -76,6 +84,7 @@ public class SetmealController {
     //修改套餐
     @PutMapping
     @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRES_NEW)
+    @CacheEvict(value = "setmealCache",allEntries = true)   //allEntries指删除当前setmealCache下的所有缓存数据
     public Result<String> update(@RequestBody SetmealDto setmealDto){
         setmealService.update(setmealDto);
         setmealDishService.update(setmealDto);
@@ -84,6 +93,8 @@ public class SetmealController {
 
     //查询套餐（用户展示）
     @GetMapping("/list")
+    //unless指满足条件时不缓存，它只能用result，condition指满足条件时缓存，它可以用root和p
+    @Cacheable(value = "setmealCache",key = "'setmeal_category_'+#setmeal.categoryId",unless = "#result==null")
     public Result<List<Setmeal>> list(Setmeal setmeal){
         if (setmeal.getCategoryId()==null||setmeal.getStatus()==null)
             return Result.error("查询套餐失败");
