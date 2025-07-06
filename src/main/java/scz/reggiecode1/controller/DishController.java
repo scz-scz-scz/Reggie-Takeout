@@ -1,5 +1,6 @@
 package scz.reggiecode1.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 //菜品和菜品口味都由该controller层管理
 @RestController
 @RequestMapping("/dish")
+@Tag(name = "3.菜品管理模块")
 public class DishController {
     private static final Logger log = LoggerFactory.getLogger(DishController.class);
     @Autowired

@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.HandlerInterceptor;
 import scz.reggiecode1.common.BaseContext;
@@ -15,17 +16,16 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         log.info("拦截到请求:{}",request.getRequestURL());   //log中可以用{}代表占位符，类似于printf
-
         HttpSession session = request.getSession();
         Long id;
         String url=request.getRequestURL().toString();
-        if ((id=(Long) session.getAttribute("employeeId"))!=null&&(url.contains("/backend")||url.contains("/employee")||url.contains("/category")||url.contains("/dish")||url.contains("/setmeal")||url.contains("/order")||url.contains("/.well-known"))){
+        if ((id=(Long) session.getAttribute("employeeId"))!=null&&(url.contains("/backend")||url.contains("/employee")||url.contains("/category")||url.contains("/dish")||url.contains("/setmeal")||url.contains("/order"))){
             log.info("员工已登录，id为{}",id);
             //在线程局部变量中设置登录员工id
             BaseContext.setCurrentId(id);
             return true;
         }
-        if ((id=(Long) session.getAttribute("userId"))!=null&&(url.contains("/front")||url.contains("/user")||url.contains("/addressBook")||url.contains("/shoppingCart")||url.contains("/order")||url.contains("/list")||url.contains("/setmeal/dish")||url.contains("/.well-known"))){
+        if ((id=(Long) session.getAttribute("userId"))!=null&&(url.contains("/front")||url.contains("/user")||url.contains("/addressBook")||url.contains("/shoppingCart")||url.contains("/order")||url.contains("/list")||url.contains("/setmeal/dish"))){
             log.info("用户已登录，id为{}",id);
             //在线程局部变量中设置登录用户id
             BaseContext.setCurrentId(id);
@@ -33,6 +33,11 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
         }
         if (url.contains("/common")||url.contains("/error")){
             return true;
+        }
+        //对knife生成的API接口文档的/favicon.ico请求返回空内容（状态码为204）
+        if (url.contains("/favicon.ico")&&"GET".equalsIgnoreCase(request.getMethod())){
+            response.setStatus(HttpStatus.NO_CONTENT.value()); // 设置状态码为204 No Content（空内容）
+            return false;
         }
         String error= JSON.toJSONString(Result.error("NOTLOGIN"));
         response.getWriter().write(error);

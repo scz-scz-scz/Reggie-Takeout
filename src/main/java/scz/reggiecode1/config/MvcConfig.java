@@ -23,8 +23,11 @@ public class MvcConfig implements WebMvcConfigurer {
     //添加拦截器
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        //请求拦截器
         List<String> ExcludePath=new ArrayList<>();
-        Collections.addAll(ExcludePath,"/backend/**","/front/**","/employee/login","/employee/logout","/user/sendMsg","/user/login");
+        Collections.addAll(ExcludePath,"/backend/**","/front/**","/employee/login","/employee/logout","/user/sendMsg","/user/login","/.well-known/**","/error");
+        //排除生成的knife文档路径
+        Collections.addAll(ExcludePath,"/doc.html","/webjars/**","/v3/**");
         registry.addInterceptor(new LoginCheckInterceptor()).addPathPatterns("/**")
                 .excludePathPatterns(ExcludePath);   //静态页面可以展示，请求数据需要拦截
     }
@@ -37,6 +40,7 @@ public class MvcConfig implements WebMvcConfigurer {
         //设置消息转换器中的对象转换器
         messageConverter.setObjectMapper(new JacksonObjectMapper());
         //将自定义的消息转换器加入到mvc的消息转换器集合中
-        converters.add(0,messageConverter); //设置执行顺序为第一个转换器
+        //converters.add(0,messageConverter); //设置执行顺序为第一个转换器
+        converters.add(1,messageConverter); //设置执行顺序为第二个，防止其优先级在knifre的消息转换器之前，导致knife无法正常显示api文档
     }
 }

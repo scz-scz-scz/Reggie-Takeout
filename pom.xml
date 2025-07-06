@@ -139,6 +139,13 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+        <!--knife4j依赖，它集合了swagger来生成api文档-->
+        <dependency>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+            <version>4.4.0</version>
+        </dependency>
     </dependencies>
 
     <build>
