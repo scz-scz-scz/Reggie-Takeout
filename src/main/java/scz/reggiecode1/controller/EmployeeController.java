@@ -1,5 +1,6 @@
 package scz.reggiecode1.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import scz.reggiecode1.service.EmployeeService;
 @Slf4j
 @RestController
 @RequestMapping("/employee")
+@Tag(name = "1.员工管理模块")
 public class EmployeeController {
     @Autowired
     private EmployeeService employeeService;
@@ -55,7 +57,7 @@ public class EmployeeController {
 
     //修改员工状态和编辑员工
     @PutMapping
-    public Result<String> updateEmployee(HttpServletRequest request,@RequestBody Employee employee){
+    public Result<String> updateEmployee(@RequestBody Employee employee){
         Long updateUser= BaseContext.getCurrentId();
         //获取原有状态
         Integer status=getById(employee.getId()).getData().getStatus();

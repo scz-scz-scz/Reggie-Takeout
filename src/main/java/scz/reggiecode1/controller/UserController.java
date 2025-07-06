@@ -1,5 +1,9 @@
 package scz.reggiecode1.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -18,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/user")
+@Tag(name = "2.用户管理模块") //knife生成的API接口文档命名
 public class UserController {
     @Autowired
     private UserService userService;
@@ -26,6 +31,7 @@ public class UserController {
 
     //发送验证码
     @PostMapping("/sendMsg")
+    @Operation(summary = "发送短信验证码功能")    //knife生成的API接口文档命名
     public Result<String> sendMsg(@RequestBody User user){
         String phone=user.getPhone();
         if (phone==null||phone.isEmpty())
@@ -40,6 +46,10 @@ public class UserController {
     //用户登录
     @PostMapping("/login")
     @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRES_NEW)
+    @Operation(summary = "用户登录功能")
+    @Parameters({
+            @Parameter(name = "map",description = "用户名-密码的键值对",required = true)
+    })
     public Result<User> login(HttpServletRequest httpServletRequest, @RequestBody Map<String,String> map){
         String phone=map.get("phone");
         String code=(String) redisTemplate.opsForValue().get(phone);
@@ -57,6 +67,7 @@ public class UserController {
 
     //退出登录
     @PostMapping("/loginout")
+    @Operation(summary = "用户登出功能")
     public Result<String> logout(HttpServletRequest request){
         request.getSession().removeAttribute("userId");
         return Result.success("退出登录");

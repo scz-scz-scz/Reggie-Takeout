@@ -29,8 +29,6 @@ public class SetmealController {
     private DishService dishService;
     @Autowired
     private CommonController commonController;
-    @Autowired
-    private CacheManager cacheManager;
 
     //新增套餐
     @PostMapping

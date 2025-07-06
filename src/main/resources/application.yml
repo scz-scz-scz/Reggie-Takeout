@@ -5,6 +5,12 @@ server:
 spring:
   application:
     name: reggie-code1
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
+  #    password: 1234
   #单数据库
   #datasource:
   #  driver-class-name: com.mysql.cj.jdbc.Driver
@@ -17,12 +23,6 @@ spring:
     driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
     url: jdbc:shardingsphere:classpath:shardingsphere.yml
     type: com.alibaba.druid.pool.DruidDataSource
-  data:
-    redis:
-      host: localhost
-      port: 6379
-      database: 0
-      #password: 1234
 
 mybatis:
   configuration:
@@ -54,3 +54,26 @@ aliyun:
     accessKeySecret: UZyoyY2mKC4Mdc09CDjAWRwxZIFJMY
     signName: 阿里云短信测试
     templateCode: SMS_154950909
+
+#springdoc-openapi项目配置，用于knife
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: scz.reggiecode1.controller
+#knife4j的增强配置，不需要增强可以不配
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+#knife4j注解：
+#@Tag：添加在controller类上，可以指定该 controller 模块的名称。knife4j默认根据字母排序，加上序号后会根据序号排序。
+#@Operation：该注解放在 controller 类下的请求方法上，可以指定该请求/方法的作用。
+#@Parameters和@Parameter：用于对请求方法的参数列表中那些未封装的参数进行说明。如果有多个参数时需要使用@Parameters将每一个@Parameter包起来。
+#@Schema：作用在实体类或者实体类的属性上，用于描述实体或者属性。
