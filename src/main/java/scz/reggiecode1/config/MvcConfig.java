@@ -1,5 +1,6 @@
 package scz.reggiecode1.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -20,6 +21,9 @@ import java.util.List;
 */
 @Configuration
 public class MvcConfig implements WebMvcConfigurer {
+    @Autowired
+    private LoginCheckInterceptor loginCheckInterceptor;
+
     //添加拦截器
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
@@ -28,7 +32,7 @@ public class MvcConfig implements WebMvcConfigurer {
         Collections.addAll(ExcludePath,"/backend/**","/front/**","/employee/login","/employee/logout","/user/sendMsg","/user/login","/.well-known/**","/error");
         //排除生成的knife文档路径
         Collections.addAll(ExcludePath,"/doc.html","/webjars/**","/v3/**");
-        registry.addInterceptor(new LoginCheckInterceptor()).addPathPatterns("/**")
+        registry.addInterceptor(loginCheckInterceptor).addPathPatterns("/**")
                 .excludePathPatterns(ExcludePath);   //静态页面可以展示，请求数据需要拦截
     }
 

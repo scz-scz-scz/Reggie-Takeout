@@ -5,14 +5,24 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import scz.reggiecode1.common.BaseContext;
 import scz.reggiecode1.common.Result;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+
 @Slf4j
+@Component
 public class LoginCheckInterceptor implements HandlerInterceptor {
+    @Value("${reggie.file.path}")
+    private String path;
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         log.info("拦截到请求:{}",request.getRequestURL());   //log中可以用{}代表占位符，类似于printf
@@ -34,9 +44,19 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
         if (url.contains("/common")||url.contains("/error")){
             return true;
         }
-        //对knife生成的API接口文档的/favicon.ico请求返回空内容（状态码为204）
+        //对/favicon.ico请求返回图标
         if (url.contains("/favicon.ico")&&"GET".equalsIgnoreCase(request.getMethod())){
-            response.setStatus(HttpStatus.NO_CONTENT.value()); // 设置状态码为204 No Content（空内容）
+            response.setContentType("image/ico");
+            BufferedInputStream bis=new BufferedInputStream(new FileInputStream(new File(path,"favicon.ico")));
+            BufferedOutputStream bos=new BufferedOutputStream(response.getOutputStream());
+            byte[] bytes=new byte[1024];
+            int len;
+            while ((len=bis.read(bytes))!=-1){
+                bos.write(bytes,0,len);
+                bos.flush();
+            }
+            bos.close();
+            bis.close();
             return false;
         }
         String error= JSON.toJSONString(Result.error("NOTLOGIN"));
