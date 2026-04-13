@@ -17,19 +17,13 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DishDto extends Dish {
-    
-    /**
-     * 菜品口味列表
-     */
+
+    // 菜品口味列表
     private List<DishFlavor> flavors = new ArrayList<>();
-    
-    /**
-     * 菜品分类名称
-     */
+
+    // 菜品分类名称
     private String categoryName;
-    
-    /**
-     * 菜品份数
-     */
+
+    // 菜品份数
     private Integer copies;
 }

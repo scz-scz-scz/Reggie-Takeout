@@ -16,14 +16,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SetmealDto extends Setmeal {
-    
-    /**
-     * 套餐关联的菜品列表
-     */
+
+    // 套餐关联的菜品列表
     private List<SetmealDish> setmealDishes;
-    
-    /**
-     * 套餐分类名称
-     */
+
+    // 套餐分类名称
     private String categoryName;
 }

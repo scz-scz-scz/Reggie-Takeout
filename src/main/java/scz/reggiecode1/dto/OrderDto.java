@@ -17,9 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderDto extends Orders {
-    
-    /**
-     * 订单明细列表
-     */
+
+    // 订单明细列表
     private List<OrderDetail> orderDetails = new ArrayList<>();
 }
