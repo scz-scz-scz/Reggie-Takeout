@@ -28,54 +28,99 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
     public Result<String> sqlexhandler(SQLIntegrityConstraintViolationException e) {
-        String error = e.toString();
-        log.error(error);
-        // 判断是新增员工还是编辑员工
-        int flag = 0;
-        StackTraceElement[] stackTrace = e.getStackTrace();
-        for (int i = 0; i < stackTrace.length; i++) {
-            if (stackTrace[i].toString().contains("scz.reggiecode1.service.impl.EmployeeServiceImpl.save")) {
-                flag = 1;
-            }
-            if (stackTrace[i].toString().contains("scz.reggiecode1.service.impl.EmployeeServiceImpl.updateEmployee")) {
-                flag = 2;
-            }
-            if (stackTrace[i].toString().contains("scz.reggiecode1.service.impl.CategoryServiceImpl.save")) {
-                flag = 3;
-            }
-            if (stackTrace[i].toString().contains("scz.reggiecode1.service.impl.CategoryServiceImpl.updateCategory")) {
-                flag = 4;
-            }
-            if (stackTrace[i].toString().contains("scz.reggiecode1.service.impl.DishServiceImpl.save")) {
-                flag = 5;
-            }
-            if (stackTrace[i].toString().contains("scz.reggiecode1.service.impl.DishServiceImpl.update")) {
-                flag = 6;
-            }
-            if (stackTrace[i].toString().contains("scz.reggiecode1.service.impl.SetmealServiceImpl.save")) {
-                flag = 7;
-            }
-            if (stackTrace[i].toString().contains("scz.reggiecode1.service.impl.SetmealServiceImpl.update")) {
-                flag = 8;
-            }
+        log.error("SQL完整性约束违反异常: {}", e.getMessage(), e);
+        
+        String message = e.getMessage();
+        
+        // 处理唯一键冲突：Duplicate entry 'xxx' for key 'xxx'
+        if (message != null && message.contains("Duplicate entry")) {
+            String duplicateValue = extractDuplicateValue(message);
+            String errorMessage = buildDuplicateErrorMessage(e, duplicateValue);
+            return Result.error(errorMessage);
         }
-        if (flag == 1)
-            return Result.error("新增员工失败：账号“" + error.split("'")[1] + "”已存在");
-        if (flag == 2)
-            return Result.error("编辑员工失败：账号“" + error.split("'")[1] + "”已存在");
-        if (flag == 3)
-            return Result.error("分类添加失败：分类“" + error.split("'")[1] + "”已存在");
-        if (flag == 4)
-            return Result.error("分类修改失败：分类“" + error.split("'")[1] + "”已存在");
-        if (flag == 5)
-            return Result.error("新增菜品失败：菜品“" + error.split("'")[1] + "”已存在");
-        if (flag == 6)
-            return Result.error("修改菜品失败：菜品“" + error.split("'")[1] + "”已存在");
-        if (flag == 7)
-            return Result.error("新增套餐失败：套餐“" + error.split("'")[1] + "”已存在");
-        if (flag == 8)
-            return Result.error("修改套餐失败：套餐“" + error.split("'")[1] + "”已存在");
-        return Result.error("未知错误");
+        
+        // 其他SQL约束异常
+        return Result.error("数据操作失败，请检查数据完整性");
+    }
+
+    /**
+     * 从异常信息中提取重复的值
+     *
+     * @param message 异常信息
+     * @return 重复的值
+     */
+    private String extractDuplicateValue(String message) {
+        try {
+            // 提取 Duplicate entry '值' for key 中的值
+            int startIndex = message.indexOf("'") + 1;
+            int endIndex = message.indexOf("'", startIndex);
+            if (startIndex > 0 && endIndex > startIndex) {
+                return message.substring(startIndex, endIndex);
+            }
+        } catch (Exception e) {
+            log.warn("提取重复值失败: {}", e.getMessage());
+        }
+        return "该数据";
+    }
+
+    /**
+     * 根据堆栈信息构建友好的错误提示
+     *
+     * @param e 异常对象
+     * @param duplicateValue 重复的值
+     * @return 错误提示信息
+     */
+    private String buildDuplicateErrorMessage(Exception e, String duplicateValue) {
+        String stackTrace = getStackTraceString(e);
+        
+        // 员工相关
+        if (stackTrace.contains("EmployeeServiceImpl.save")) {
+            return String.format("新增员工失败：账号%s已存在", duplicateValue);
+        }
+        if (stackTrace.contains("EmployeeServiceImpl.update")) {
+            return String.format("编辑员工失败：账号%s已存在", duplicateValue);
+        }
+        
+        // 分类相关
+        if (stackTrace.contains("CategoryServiceImpl.save")) {
+            return String.format("分类添加失败：分类%s已存在", duplicateValue);
+        }
+        if (stackTrace.contains("CategoryServiceImpl.update")) {
+            return String.format("分类修改失败：分类%s已存在", duplicateValue);
+        }
+        
+        // 菜品相关
+        if (stackTrace.contains("DishServiceImpl.save")) {
+            return String.format("新增菜品失败：菜品%s已存在", duplicateValue);
+        }
+        if (stackTrace.contains("DishServiceImpl.update")) {
+            return String.format("修改菜品失败：菜品%s已存在", duplicateValue);
+        }
+        
+        // 套餐相关
+        if (stackTrace.contains("SetmealServiceImpl.save")) {
+            return String.format("新增套餐失败：套餐%s已存在", duplicateValue);
+        }
+        if (stackTrace.contains("SetmealServiceImpl.update")) {
+            return String.format("修改套餐失败：套餐%s已存在", duplicateValue);
+        }
+        
+        // 默认提示
+        return String.format("操作失败：%s已存在", duplicateValue);
+    }
+
+    /**
+     * 获取堆栈跟踪字符串
+     *
+     * @param e 异常对象
+     * @return 堆栈跟踪字符串
+     */
+    private String getStackTraceString(Exception e) {
+        StringBuilder sb = new StringBuilder();
+        for (StackTraceElement element : e.getStackTrace()) {
+            sb.append(element.toString());
+        }
+        return sb.toString();
     }
 
     /**
@@ -87,7 +132,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler({IllegalAccessException.class, InvocationTargetException.class, NoSuchMethodException.class})
     public Result<String> metaexhandler(Exception e) {
-        log.error(e.toString());
+        log.error("反射操作异常: {}", e.getMessage(), e);
         return Result.error("设置信息错误");
     }
 
@@ -102,8 +147,8 @@ public class GlobalExceptionHandler {
      * @return 错误结果
      */
     @ExceptionHandler(CustomException.class)
-    public Result<String> customexhandler(Exception e) {
-        log.error(e.toString());
+    public Result<String> customexhandler(CustomException e) {
+        log.error("业务异常: {}", e.getMessage(), e);
         return Result.error(e.getMessage());
     }
 
@@ -115,9 +160,9 @@ public class GlobalExceptionHandler {
      * @return 错误结果
      */
     @ExceptionHandler(IOException.class)
-    public Result<String> ioexhandler(Exception e) {
-        log.error(e.toString());
-        return Result.error("文件上传失败");
+    public Result<String> ioexhandler(IOException e) {
+        log.error("IO异常: {}", e.getMessage(), e);
+        return Result.error("文件操作失败");
     }
 
     /**
@@ -127,8 +172,8 @@ public class GlobalExceptionHandler {
      * @return 错误结果
      */
     @ExceptionHandler(MyClientException.class)
-    public Result<String> clientexhandler(Exception e) {
-        log.error(e.toString());
+    public Result<String> clientexhandler(MyClientException e) {
+        log.error("短信发送异常: {}", e.getMessage(), e);
         return Result.error("验证码发送失败");
     }
 }
