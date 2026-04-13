@@ -56,7 +56,7 @@ public class DishController {
         log.info("新增菜品：{}", dishDto);
         dishService.save(dishDto);
         dishFlavorService.save(dishDto);
-        delete(dishDto.getCategoryId());
+        clearCache(dishDto.getCategoryId());
         return Result.success("新增菜品成功");
     }
 
@@ -94,7 +94,7 @@ public class DishController {
         dishService.update(dishDto);
         setmealDishService.update(dishDto);
         dishFlavorService.update(dishDto);
-        delete(dishDto.getCategoryId());
+        clearCache(dishDto.getCategoryId());
         return Result.success("修改菜品成功");
     }
 
@@ -107,7 +107,7 @@ public class DishController {
         log.info("启停售菜品，状态：{}，菜品ID：{}", status, ids);
         List<DishDto> dishDtoList = dishService.updateStatus(status, ids);
         for (DishDto dishDto : dishDtoList) {
-            delete(dishDto.getCategoryId());
+            clearCache(dishDto.getCategoryId());
         }
         if (status == 0) {
             return Result.success("停售菜品成功");
@@ -115,36 +115,41 @@ public class DishController {
         return Result.success("启售菜品成功");
     }
 
-    // 删除菜品
+    /**
+     * 删除菜品
+     */
     @DeleteMapping
+    @Operation(summary = "删除菜品")
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
     public Result<String> delete(@RequestParam Long[] ids) {
-        //删除口味
+        log.info("删除菜品：{}", (Object) ids);
         dishFlavorService.delete(ids);
-        //删除关联套餐中的对应菜品
         setmealDishService.deleteByDishId(ids);
-        //删除菜品并获取图片名
         List<DishDto> dishDtoList = dishService.delete(ids);
-        //删除图片
         commonController.delete(dishDtoList.stream().map(Dish::getImage).toArray(String[]::new));
         for (DishDto dishDto : dishDtoList) {
-            delete(dishDto.getCategoryId());
+            clearCache(dishDto.getCategoryId());
         }
         return Result.success("删除菜品成功");
     }
 
-    // 查询菜品（新增和修改套餐时展示，以及用户展示）
+    /**
+     * 查询菜品列表
+     */
     @GetMapping("/list")
+    @Operation(summary = "查询菜品列表")
     public Result<List<DishDto>> list(Dish dish) {
-        if (dish.getCategoryId() == null)
+        log.info("查询菜品列表：{}", dish);
+        if (dish.getCategoryId() == null) {
             return Result.error("查询菜品失败");
-        //先查缓存
+        }
+        
         String key = CACHE_KEY_PREFIX + dish.getCategoryId();
         List<DishDto> dishDtoList = (List<DishDto>) redisTemplate.opsForValue().get(key);
-        //缓存中存在就直接返回
-        if (dishDtoList != null)
+        if (dishDtoList != null) {
             return Result.success(dishDtoList);
-        //缓存中不存在就查数据库，同时将结果加入缓存
+        }
+        
         dishDtoList = dishService.list(dish);
         for (DishDto dishDto : dishDtoList) {
             dishDto.setFlavors(dishFlavorService.list(dishDto.getId()));
@@ -153,8 +158,10 @@ public class DishController {
         return Result.success(dishDtoList);
     }
 
-    // 清理缓存
-    private void delete(Long categoryId) {
+    /**
+     * 清理缓存
+     */
+    private void clearCache(Long categoryId) {
         String key = CACHE_KEY_PREFIX + categoryId;
         redisTemplate.delete(key);
     }

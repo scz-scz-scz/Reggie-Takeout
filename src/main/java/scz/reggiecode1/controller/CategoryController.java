@@ -38,9 +38,13 @@ public class CategoryController {
         return Result.success("新增套餐分类成功");
     }
 
-    // 查询分类（分页展示）
+    /**
+     * 分页查询分类
+     */
     @GetMapping("/page")
+    @Operation(summary = "分页查询分类")
     public Result<PageBean<Category>> list(@RequestParam Integer page, @RequestParam Integer pageSize) {
+        log.info("分页查询分类，页码：{}，每页数量：{}", page, pageSize);
         PageBean<Category> categoryList = categoryService.list(page, pageSize);
         return Result.success(categoryList);
     }
