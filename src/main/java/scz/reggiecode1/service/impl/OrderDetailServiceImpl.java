@@ -13,31 +13,39 @@ import scz.reggiecode1.service.OrderDetailService;
 
 import java.util.List;
 
+/**
+ * 订单明细服务实现类
+ */
 @Slf4j
 @Service
 public class OrderDetailServiceImpl implements OrderDetailService {
+
     @Autowired
     private OrderDetailMapper orderDetailMapper;
 
-    //下单
+    /**
+     * 下单
+     */
     @Override
     public void save(Orders order, List<ShoppingCart> shoppingCartList) {
-        Long maxId=orderDetailMapper.getMaxId();
-        if (maxId==null)
-            maxId=0L;
+        Long maxId = orderDetailMapper.getMaxId();
+        if (maxId == null) {
+            maxId = 0L;
+        }
         for (ShoppingCart shoppingCart : shoppingCartList) {
-            OrderDetail orderDetail=new OrderDetail();
-            orderDetail.setId(maxId+1);
+            OrderDetail orderDetail = new OrderDetail();
+            orderDetail.setId(maxId + 1);
             maxId++;
             orderDetail.setOrderId(order.getId());
-            //beanutils是一个springboot工具类，可以在类之间进行属性复制（要求属性名相同）
-            BeanUtils.copyProperties(shoppingCart,orderDetail,"id","userId","createTime");
+            // beanutils是一个springboot工具类，可以在类之间进行属性复制（要求属性名相同）
+            BeanUtils.copyProperties(shoppingCart, orderDetail, "id", "userId", "createTime");
             orderDetailMapper.save(orderDetail);
         }
-
     }
 
-    //查询订单明细
+    /**
+     * 查询订单明细
+     */
     @Override
     public void list(List<OrderDto> orderDtoList) {
         for (OrderDto orderDto : orderDtoList) {
@@ -45,15 +53,18 @@ public class OrderDetailServiceImpl implements OrderDetailService {
         }
     }
 
-    //再下一单
+    /**
+     * 再下一单
+     */
     @Override
-    public void again(Long oldOrderId,Long newOrderId) {
+    public void again(Long oldOrderId, Long newOrderId) {
         List<OrderDetail> orderDetailList = orderDetailMapper.list(oldOrderId);
-        Long maxId=orderDetailMapper.getMaxId();
-        if (maxId==null)
-            maxId=0L;
+        Long maxId = orderDetailMapper.getMaxId();
+        if (maxId == null) {
+            maxId = 0L;
+        }
         for (OrderDetail orderDetail : orderDetailList) {
-            orderDetail.setId(maxId+1);
+            orderDetail.setId(maxId + 1);
             maxId++;
             orderDetail.setOrderId(newOrderId);
             orderDetailMapper.save(orderDetail);

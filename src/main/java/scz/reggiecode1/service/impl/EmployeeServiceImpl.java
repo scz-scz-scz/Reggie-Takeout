@@ -4,25 +4,31 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
+import scz.reggiecode1.common.MyMetaObjectHandler;
 import scz.reggiecode1.entity.Employee;
 import scz.reggiecode1.entity.PageBean;
 import scz.reggiecode1.mapper.EmployeeMapper;
 import scz.reggiecode1.service.EmployeeService;
-import scz.reggiecode1.common.MyMetaObjectHandler;
 
 import java.util.List;
 
+/**
+ * 员工服务实现类
+ */
 @Slf4j
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
+
     @Autowired
     private EmployeeMapper employeeMapper;
 
-    // 登录
+    /**
+     * 登录
+     */
     @Override
     public Employee login(Employee employee) {
         String password = employee.getPassword();
-        password = DigestUtils.md5DigestAsHex(password.getBytes());  // md5加密
+        password = DigestUtils.md5DigestAsHex(password.getBytes());
         employee.setPassword(password);
         Employee emp = employeeMapper.login(employee);
         // 检查用户名、密码和状态
@@ -37,7 +43,9 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
     }
 
-    // 新增员工
+    /**
+     * 新增员工
+     */
     @Override
     public void save(Employee employee) {
         // 设置初始密码并进行md5加密
@@ -54,7 +62,9 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeMapper.save(employee);
     }
 
-    // 查询员工
+    /**
+     * 查询员工
+     */
     @Override
     public PageBean<Employee> list(Integer page, Integer pageSize, String name) {
         Integer total = employeeMapper.selectAll(name);
@@ -64,14 +74,18 @@ public class EmployeeServiceImpl implements EmployeeService {
         return result;
     }
 
-    //修改员工状态和编辑员工
+    /**
+     * 修改员工状态和编辑员工
+     */
     @Override
     public void updateEmployee(Employee employee) {
         MyMetaObjectHandler.update(employee);
         employeeMapper.updateEmployee(employee);
     }
 
-    // 编辑员工时的数据回显
+    /**
+     * 编辑员工时的数据回显
+     */
     @Override
     public Employee getById(Long id) {
         Employee employee = employeeMapper.selectById(id);
