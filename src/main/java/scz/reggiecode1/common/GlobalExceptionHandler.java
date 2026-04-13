@@ -10,11 +10,22 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLIntegrityConstraintViolationException;
 
+/**
+ * 全局异常处理器
+ * 统一处理系统中的各类异常
+ */
 @Slf4j
 @Hidden
-@RestControllerAdvice(annotations = RestController.class)   // 指定异常处理器只代理RestController类
+@RestControllerAdvice(annotations = RestController.class)
 public class GlobalExceptionHandler {
-    // 新增员工时，捕获账号相同的异常
+
+    /**
+     * 处理SQL完整性约束违反异常
+     * 主要用于捕获唯一键冲突等数据库约束异常
+     *
+     * @param e SQL完整性约束违反异常
+     * @return 错误结果
+     */
     @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
     public Result<String> sqlexhandler(SQLIntegrityConstraintViolationException e) {
         String error = e.toString();
@@ -67,30 +78,54 @@ public class GlobalExceptionHandler {
         return Result.error("未知错误");
     }
 
-    // 自动填充字段时，捕获动态代理方法的异常
+    /**
+     * 处理反射相关异常
+     * 主要用于捕获自动填充字段时的动态代理方法异常
+     *
+     * @param e 异常对象
+     * @return 错误结果
+     */
     @ExceptionHandler({IllegalAccessException.class, InvocationTargetException.class, NoSuchMethodException.class})
     public Result<String> metaexhandler(Exception e) {
         log.error(e.toString());
         return Result.error("设置信息错误");
     }
 
-    // 删除的分类关联菜品或套餐时，捕获自定义异常
-    // 删除的菜品或套餐状态为启售时，捕获自定义异常
-    // 下单时如果购物车为空，捕获自定义异常
+    /**
+     * 处理自定义业务异常
+     * 用于以下场景：
+     * 1. 删除的分类关联了菜品或套餐
+     * 2. 删除的菜品或套餐状态为启售
+     * 3. 下单时购物车为空
+     *
+     * @param e 自定义异常
+     * @return 错误结果
+     */
     @ExceptionHandler(CustomException.class)
     public Result<String> customexhandler(Exception e) {
         log.error(e.toString());
         return Result.error(e.getMessage());
     }
 
-    // 文件上传和下载时，捕获IO相关异常
+    /**
+     * 处理IO异常
+     * 主要用于文件上传和下载时的异常处理
+     *
+     * @param e IO异常
+     * @return 错误结果
+     */
     @ExceptionHandler(IOException.class)
     public Result<String> ioexhandler(Exception e) {
         log.error(e.toString());
         return Result.error("文件上传失败");
     }
 
-    // 短信发送失败时，捕获自定义异常
+    /**
+     * 处理短信发送异常
+     *
+     * @param e 短信发送异常
+     * @return 错误结果
+     */
     @ExceptionHandler(MyClientException.class)
     public Result<String> clientexhandler(Exception e) {
         log.error(e.toString());
