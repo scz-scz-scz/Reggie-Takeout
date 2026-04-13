@@ -12,86 +12,87 @@ import java.sql.SQLIntegrityConstraintViolationException;
 
 @Slf4j
 @Hidden
-@RestControllerAdvice(annotations = RestController.class)   //指定异常处理器只代理RestController类
+@RestControllerAdvice(annotations = RestController.class)   // 指定异常处理器只代理RestController类
 public class GlobalExceptionHandler {
-    //新增员工时，捕获账号相同的异常
+    // 新增员工时，捕获账号相同的异常
     @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
-    public Result<String> sqlexhandler(SQLIntegrityConstraintViolationException e){
-        String error=e.toString();
+    public Result<String> sqlexhandler(SQLIntegrityConstraintViolationException e) {
+        String error = e.toString();
         log.error(error);
-        //判断是新增员工还是编辑员工
-        int flag=0;
+        // 判断是新增员工还是编辑员工
+        int flag = 0;
         StackTraceElement[] stackTrace = e.getStackTrace();
         for (int i = 0; i < stackTrace.length; i++) {
-            if (stackTrace[i].toString().contains("scz.reggiecode1.service.impl.EmployeeServiceImpl.save"))
-                flag=1;
+            if (stackTrace[i].toString().contains("scz.reggiecode1.service.impl.EmployeeServiceImpl.save")) {
+                flag = 1;
+            }
             if (stackTrace[i].toString().contains("scz.reggiecode1.service.impl.EmployeeServiceImpl.updateEmployee")) {
-                flag=2;
+                flag = 2;
             }
             if (stackTrace[i].toString().contains("scz.reggiecode1.service.impl.CategoryServiceImpl.save")) {
-                flag=3;
+                flag = 3;
             }
             if (stackTrace[i].toString().contains("scz.reggiecode1.service.impl.CategoryServiceImpl.updateCategory")) {
-                flag=4;
+                flag = 4;
             }
             if (stackTrace[i].toString().contains("scz.reggiecode1.service.impl.DishServiceImpl.save")) {
-                flag=5;
+                flag = 5;
             }
             if (stackTrace[i].toString().contains("scz.reggiecode1.service.impl.DishServiceImpl.update")) {
-                flag=6;
+                flag = 6;
             }
             if (stackTrace[i].toString().contains("scz.reggiecode1.service.impl.SetmealServiceImpl.save")) {
-                flag=7;
+                flag = 7;
             }
             if (stackTrace[i].toString().contains("scz.reggiecode1.service.impl.SetmealServiceImpl.update")) {
-                flag=8;
+                flag = 8;
             }
         }
-        if (flag==1)
-            return Result.error("新增员工失败：账号“"+error.split("'")[1]+"”已存在");
-        if (flag==2)
-            return Result.error("编辑员工失败：账号“"+error.split("'")[1]+"”已存在");
-        if (flag==3)
-            return Result.error("分类添加失败：分类“"+error.split("'")[1]+"”已存在");
-        if (flag==4)
-            return Result.error("分类修改失败：分类“"+error.split("'")[1]+"”已存在");
-        if (flag==5)
-            return Result.error("新增菜品失败：菜品“"+error.split("'")[1]+"”已存在");
-        if (flag==6)
-            return Result.error("修改菜品失败：菜品“"+error.split("'")[1]+"”已存在");
-        if (flag==7)
-            return Result.error("新增套餐失败：套餐“"+error.split("'")[1]+"”已存在");
-        if (flag==8)
-            return Result.error("修改套餐失败：套餐“"+error.split("'")[1]+"”已存在");
+        if (flag == 1)
+            return Result.error("新增员工失败：账号“" + error.split("'")[1] + "”已存在");
+        if (flag == 2)
+            return Result.error("编辑员工失败：账号“" + error.split("'")[1] + "”已存在");
+        if (flag == 3)
+            return Result.error("分类添加失败：分类“" + error.split("'")[1] + "”已存在");
+        if (flag == 4)
+            return Result.error("分类修改失败：分类“" + error.split("'")[1] + "”已存在");
+        if (flag == 5)
+            return Result.error("新增菜品失败：菜品“" + error.split("'")[1] + "”已存在");
+        if (flag == 6)
+            return Result.error("修改菜品失败：菜品“" + error.split("'")[1] + "”已存在");
+        if (flag == 7)
+            return Result.error("新增套餐失败：套餐“" + error.split("'")[1] + "”已存在");
+        if (flag == 8)
+            return Result.error("修改套餐失败：套餐“" + error.split("'")[1] + "”已存在");
         return Result.error("未知错误");
     }
 
-    //自动填充字段时，捕获动态代理方法的异常
+    // 自动填充字段时，捕获动态代理方法的异常
     @ExceptionHandler({IllegalAccessException.class, InvocationTargetException.class, NoSuchMethodException.class})
-    public Result<String> metaexhandler(Exception e){
+    public Result<String> metaexhandler(Exception e) {
         log.error(e.toString());
         return Result.error("设置信息错误");
     }
 
-    //删除的分类关联菜品或套餐时，捕获自定义异常
-    //删除的菜品或套餐状态为启售时，捕获自定义异常
-    //下单时如果购物车为空，捕获自定义异常
+    // 删除的分类关联菜品或套餐时，捕获自定义异常
+    // 删除的菜品或套餐状态为启售时，捕获自定义异常
+    // 下单时如果购物车为空，捕获自定义异常
     @ExceptionHandler(CustomException.class)
-    public Result<String> customexhandler(Exception e){
+    public Result<String> customexhandler(Exception e) {
         log.error(e.toString());
         return Result.error(e.getMessage());
     }
 
-    //文件上传和下载时，捕获IO相关异常
+    // 文件上传和下载时，捕获IO相关异常
     @ExceptionHandler(IOException.class)
-    public Result<String> ioexhandler(Exception e){
+    public Result<String> ioexhandler(Exception e) {
         log.error(e.toString());
         return Result.error("文件上传失败");
     }
 
-    //短信发送失败时，捕获自定义异常
+    // 短信发送失败时，捕获自定义异常
     @ExceptionHandler(MyClientException.class)
-    public Result<String> clientexhandler(Exception e){
+    public Result<String> clientexhandler(Exception e) {
         log.error(e.toString());
         return Result.error("验证码发送失败");
     }
