@@ -18,16 +18,16 @@ import scz.reggiecode1.common.JacksonObjectMapper;
 import java.time.Duration;
 
 @Configuration
-public class RedisConfig{
+public class RedisConfig {
     @Autowired
     private RedisConnectionFactory redisConnectionFactory;
-    private final StringRedisSerializer stringRedisSerializer=new StringRedisSerializer();
+    private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
     //当用到RedisTemplate时需要以下配置类
     @Bean
-    public RedisTemplate<String,Object> redisTemplate(){
-        RedisTemplate<String,Object> redisTemplate=new RedisTemplate<>();
-        GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer=new GenericJackson2JsonRedisSerializer(new JacksonObjectMapper());
+    public RedisTemplate<String, Object> redisTemplate() {
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+        GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer = new GenericJackson2JsonRedisSerializer(new JacksonObjectMapper());
         redisTemplate.setKeySerializer(stringRedisSerializer);
         redisTemplate.setValueSerializer(genericJackson2JsonRedisSerializer);
         redisTemplate.setHashKeySerializer(stringRedisSerializer);
@@ -38,11 +38,11 @@ public class RedisConfig{
 
     //当用到RedisCacheManager时需要以下配置类
     @Bean
-    public RedisCacheManager redisCacheManager(){
-        GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer=new GenericJackson2JsonRedisSerializer(
+    public RedisCacheManager redisCacheManager() {
+        GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer = new GenericJackson2JsonRedisSerializer(
                 //缓存时，将类名也缓存进去
                 new JacksonObjectMapper().activateDefaultTyping(LaissezFaireSubTypeValidator.instance,
-                ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY)
+                        ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY)
         );
         //RedisCacheConfiguration相当于是RedisCacheManager的配置类，里面记录了缓存策略
         RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
