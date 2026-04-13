@@ -1,8 +1,8 @@
 package scz.reggiecode1.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.transaction.annotation.Propagation;
@@ -19,53 +19,78 @@ import scz.reggiecode1.service.SetmealDishService;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-// 菜品和菜品口味都由该controller层管理
+/**
+ * 菜品管理控制器
+ * 负责菜品和菜品口味的管理
+ */
+@Slf4j
 @RestController
 @RequestMapping("/dish")
-@Tag(name = "3.菜品管理模块")
+@Tag(name = "菜品管理")
 public class DishController {
-    private static final Logger log = LoggerFactory.getLogger(DishController.class);
+    
+    private static final String CACHE_KEY_PREFIX = "dish_category_";
+    
     @Autowired
     private DishService dishService;
+    
     @Autowired
     private DishFlavorService dishFlavorService;
+    
     @Autowired
     private SetmealDishService setmealDishService;
+    
     @Autowired
     private CommonController commonController;
+    
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
-    private final String prekey = "dish_category_";
 
-    // 新增菜品
+    /**
+     * 新增菜品
+     */
     @PostMapping
+    @Operation(summary = "新增菜品")
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
     public Result<String> save(@RequestBody DishDto dishDto) {
+        log.info("新增菜品：{}", dishDto);
         dishService.save(dishDto);
         dishFlavorService.save(dishDto);
         delete(dishDto.getCategoryId());
         return Result.success("新增菜品成功");
     }
 
-    // 查询菜品（分页展示）
+    /**
+     * 分页查询菜品
+     */
     @GetMapping("/page")
-    public Result<PageBean<DishDto>> list(@RequestParam Integer page, @RequestParam Integer pageSize, String name) {
+    @Operation(summary = "分页查询菜品")
+    public Result<PageBean<DishDto>> page(@RequestParam Integer page, @RequestParam Integer pageSize, String name) {
+        log.info("分页查询菜品，页码：{}，每页数量：{}，菜品名称：{}", page, pageSize, name);
         PageBean<DishDto> dishDtoList = dishService.list(page, pageSize, name);
         return Result.success(dishDtoList);
     }
 
-    // 查询菜品（修改菜品时展示）
+    /**
+     * 根据ID查询菜品
+     */
     @GetMapping("/{dishId}")
-    public Result<DishDto> list(@PathVariable Long dishId) {
+    @Operation(summary = "根据ID查询菜品")
+    public Result<DishDto> getById(@PathVariable Long dishId) {
+        log.info("根据ID查询菜品：{}", dishId);
         DishDto dishDto = dishService.list(dishId);
         dishDto.setFlavors(dishFlavorService.list(dishId));
         return Result.success(dishDto);
     }
 
-    // 修改菜品
+    /**
+     * 修改菜品
+     */
     @PutMapping
+    @Operation(summary = "修改菜品")
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
     public Result<String> update(@RequestBody DishDto dishDto) {
+        log.info("修改菜品：{}", dishDto);
         dishService.update(dishDto);
         setmealDishService.update(dishDto);
         dishFlavorService.update(dishDto);
@@ -73,15 +98,20 @@ public class DishController {
         return Result.success("修改菜品成功");
     }
 
-    // 启停售菜品
+    /**
+     * 启停售菜品
+     */
     @PostMapping("/status/{status}")
+    @Operation(summary = "启停售菜品")
     public Result<String> updateStatus(@PathVariable Integer status, @RequestParam Long[] ids) {
+        log.info("启停售菜品，状态：{}，菜品ID：{}", status, ids);
         List<DishDto> dishDtoList = dishService.updateStatus(status, ids);
         for (DishDto dishDto : dishDtoList) {
             delete(dishDto.getCategoryId());
         }
-        if (status == 0)
+        if (status == 0) {
             return Result.success("停售菜品成功");
+        }
         return Result.success("启售菜品成功");
     }
 
@@ -109,7 +139,7 @@ public class DishController {
         if (dish.getCategoryId() == null)
             return Result.error("查询菜品失败");
         //先查缓存
-        String key = prekey + dish.getCategoryId();
+        String key = CACHE_KEY_PREFIX + dish.getCategoryId();
         List<DishDto> dishDtoList = (List<DishDto>) redisTemplate.opsForValue().get(key);
         //缓存中存在就直接返回
         if (dishDtoList != null)
@@ -125,7 +155,7 @@ public class DishController {
 
     // 清理缓存
     private void delete(Long categoryId) {
-        String key = prekey + categoryId;
+        String key = CACHE_KEY_PREFIX + categoryId;
         redisTemplate.delete(key);
     }
 }
